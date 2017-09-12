@@ -12,7 +12,7 @@ public class Startup extends Application {
     }
 
     @Override
-    public void start(Stage primaryStage) throws Exception{
+    public void start(Stage primaryStage) throws Exception {
         primaryStage.setOnCloseRequest(e -> shutdown());
         primaryStage.setTitle("File Renaming Utility");
         MainPageController mainPageController = new MainPageController();

@@ -1,6 +1,5 @@
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -12,9 +11,11 @@ import javafx.stage.FileChooser;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ResourceBundle;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.stream.Stream;
 
 public class MainPageController extends GridPane implements Initializable {
 
@@ -48,8 +49,8 @@ public class MainPageController extends GridPane implements Initializable {
         Append;
     }
 
-    private List<File> files;
-    private List<File> directories;
+    private Set<File> primaryFiles;
+    private Set<File> allFiles;
     private boolean renameFilesSetting;
     private boolean renameDirectoriesSetting;
     private boolean includeSubdirectoriesSetting;
@@ -58,8 +59,8 @@ public class MainPageController extends GridPane implements Initializable {
 
 
     public MainPageController() {
-        this.files = new ArrayList<>();
-        this.directories = new ArrayList<>();
+        this.primaryFiles = new TreeSet<>(new FileDepthComparator());
+        this.allFiles = new TreeSet<>(new FileDepthComparator());
         this.renameFilesSetting = false;
         this.renameDirectoriesSetting = false;
         this.includeSubdirectoriesSetting = false;
@@ -115,7 +116,8 @@ public class MainPageController extends GridPane implements Initializable {
         fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
         List<File> selectedFiles = fileChooser.showOpenMultipleDialog(addFilesButton.getScene().getWindow());
         if (selectedFiles != null) {
-            this.files.addAll(selectedFiles);
+            this.primaryFiles.addAll(selectedFiles);
+            computeAllFilesRecursively();
             updateSelectedFilesTextField();
         }
     }
@@ -125,34 +127,35 @@ public class MainPageController extends GridPane implements Initializable {
         directoryChooser.setInitialDirectory(new File(System.getProperty("user.home")));
         File selectedDirectory = directoryChooser.showDialog(addDirectoryButton.getScene().getWindow());
         if (selectedDirectory != null) {
-            this.directories.add(selectedDirectory);
+            this.primaryFiles.add(selectedDirectory);
+            computeAllFilesRecursively();
             updateSelectedFilesTextField();
         }
     }
 
     private void clearSelectedFiles() {
-        this.files.clear();
-        this.directories.clear();
+        this.primaryFiles.clear();
+        computeAllFilesRecursively();
         updateSelectedFilesTextField();
     }
 
     private void updateSelectedFilesTextField() {
-        String updatedString = "Files:\n";
+        Set<File> files = getActiveFileSet();
 
-        for (int i = 0; i < this.files.size(); i++) {
-            File currentFile = this.files.get(i);
-            updatedString += currentFile.getName();
-            updatedString += "\n";
+        String filesString = "Files:\n";
+        String directoriesString = "Directories:\n";
+
+        for (File currentFile : files) {
+            if (currentFile.isFile()) {
+                filesString += currentFile.getName();
+                filesString += "\n";
+            } else {
+                directoriesString += currentFile.getName();
+                directoriesString += "\n";
+            }
         }
 
-        updatedString += "\nDirectories:\n";
-        for (int i = 0; i < this.directories.size(); i++) {
-            File currentFile = this.directories.get(i);
-            updatedString += currentFile.getName();
-            updatedString += "\n";
-        }
-
-        this.fileSelectionTextArea.setText(updatedString);
+        this.fileSelectionTextArea.setText(filesString + "\n" + directoriesString);
     }
 
     private void updateRenameFilesSetting() {
@@ -165,6 +168,8 @@ public class MainPageController extends GridPane implements Initializable {
 
     private void updateIncludeSubdirectoriesSetting() {
         this.includeSubdirectoriesSetting = this.includeSubdirectoriesCheckbox.isSelected();
+        computeAllFilesRecursively();
+        updateSelectedFilesTextField();
     }
 
     private void updateOperation() {
@@ -173,12 +178,49 @@ public class MainPageController extends GridPane implements Initializable {
 
     private void renameFiles() {
         // TODO: Implement
-        System.out.println(this.files.toString());
-        System.out.println(this.directories.toString());
+        System.out.println(this.primaryFiles.toString());
         System.out.println(this.renameFilesSetting);
         System.out.println(this.renameDirectoriesSetting);
         System.out.println(this.includeSubdirectoriesSetting);
         System.out.println(this.operation);
         System.out.println(this.textToAdd);
+
+        System.out.println("");
+        printFileList();
+    }
+
+    private void computeAllFilesRecursively() {
+        this.allFiles.clear();
+        if (this.includeSubdirectoriesSetting) {
+            for (File currentFile : this.primaryFiles) {
+                if (currentFile.isDirectory()) {
+                    try (Stream<Path> paths = Files.walk(Paths.get(currentFile.toURI()))) {
+                        paths.forEach((path) -> {
+                            this.allFiles.add(new File(path.toString()));
+                        });
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        } else {
+            this.allFiles.addAll(this.primaryFiles);
+        }
+    }
+
+    private void printFileList() {
+        Set<File> files = getActiveFileSet();
+        System.out.println("Count: " + files.size());
+        for (File currentFile : files) {
+            System.out.println(currentFile.toString());
+        }
+    }
+
+    private Set<File> getActiveFileSet() {
+        if (this.includeSubdirectoriesSetting) {
+            return this.allFiles;
+        } else {
+            return this.primaryFiles;
+        }
     }
 }
