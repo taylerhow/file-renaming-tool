@@ -1,3 +1,4 @@
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -100,7 +101,11 @@ public class MainPageController extends GridPane implements Initializable {
         this.directoriesCheckbox.setOnAction((event -> updateRenameDirectoriesSetting()));
         this.includeSubdirectoriesCheckbox.setOnAction((event -> updateIncludeSubdirectoriesSetting()));
         this.operationChoiceBox.setOnAction((event -> updateOperation()));
-        this.textToAddTextField.setOnAction((event -> updateTextToAdd()));
+        this.textToAddTextField.textProperty().addListener(((observable, oldValue, newValue) -> {
+            this.textToAdd = newValue;
+        }));
+        this.renameFilesButton.setOnAction((event -> renameFiles()));
+        this.exitButton.setOnAction((event -> Platform.exit()));
 
         updateSelectedFilesTextField();
     }
@@ -168,5 +173,16 @@ public class MainPageController extends GridPane implements Initializable {
 
     private void updateTextToAdd() {
         this.textToAdd = this.textToAddTextField.getText();
+    }
+
+    private void renameFiles() {
+        // TODO: Implement
+        System.out.println(this.files.toString());
+        System.out.println(this.directories.toString());
+        System.out.println(this.renameFilesSetting);
+        System.out.println(this.renameDirectoriesSetting);
+        System.out.println(this.includeSubdirectoriesSetting);
+        System.out.println(this.operation);
+        System.out.println(this.textToAdd);
     }
 }
