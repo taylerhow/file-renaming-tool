@@ -252,6 +252,7 @@ public class MainPageController extends GridPane implements Initializable {
                 e.printStackTrace();
             }
         }
+        clearSelectedFiles();
     }
 
     private String calculateNewPathString(String oldPathString) {
