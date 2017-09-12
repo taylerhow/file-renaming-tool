@@ -171,10 +171,6 @@ public class MainPageController extends GridPane implements Initializable {
         this.operation = this.operationChoiceBox.getValue();
     }
 
-    private void updateTextToAdd() {
-        this.textToAdd = this.textToAddTextField.getText();
-    }
-
     private void renameFiles() {
         // TODO: Implement
         System.out.println(this.files.toString());
