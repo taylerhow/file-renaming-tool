@@ -1,3 +1,4 @@
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -42,10 +43,18 @@ public class MainPageController extends GridPane implements Initializable {
 
     private List<File> files;
     private List<File> directories;
+    private boolean renameFilesSetting;
+    private boolean renameDirectoriesSetting;
+    private boolean includeSubdirectoriesSetting;
+    private String textToAdd;
+
 
     public MainPageController() {
         this.files = new ArrayList<>();
         this.directories = new ArrayList<>();
+        this.renameFilesSetting = false;
+        this.renameDirectoriesSetting = false;
+        this.textToAdd = "";
 
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(pageLoc));
@@ -72,9 +81,13 @@ public class MainPageController extends GridPane implements Initializable {
     @Override
     public void initialize(URL fxmlFileLocation, ResourceBundle resources) {
         this.fileSelectionTextArea.setEditable(false);
+
         this.addFilesButton.setOnAction((event -> addFiles()));
         this.addDirectoryButton.setOnAction((event -> addDirectory()));
         this.clearFileSelectionButton.setOnAction((event -> clearSelectedFiles()));
+        this.filesCheckbox.setOnAction((event -> updateRenameFilesSetting()));
+        this.directoriesCheckbox.setOnAction((event -> updateRenameDirectoriesSetting()));
+        this.includeSubdirectoriesCheckbox.setOnAction((event -> updateIncludeSubdirectoriesSetting()));
 
         updateSelectedFilesTextField();
     }
@@ -122,5 +135,17 @@ public class MainPageController extends GridPane implements Initializable {
         }
 
         this.fileSelectionTextArea.setText(updatedString);
+    }
+
+    private void updateRenameFilesSetting() {
+        this.renameFilesSetting = this.filesCheckbox.isSelected();
+    }
+
+    private void updateRenameDirectoriesSetting() {
+        this.renameDirectoriesSetting = this.directoriesCheckbox.isSelected();
+    }
+
+    private void updateIncludeSubdirectoriesSetting() {
+        this.includeSubdirectoriesSetting = this.includeSubdirectoriesCheckbox.isSelected();
     }
 }
