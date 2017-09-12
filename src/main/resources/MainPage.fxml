@@ -9,27 +9,21 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 
-<fx:root fx:id="textToAddTextbox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="334.0" prefWidth="551.0" type="GridPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="431.0" prefWidth="714.0" type="GridPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
   <columnConstraints>
-      <ColumnConstraints hgrow="SOMETIMES" maxWidth="191.0" minWidth="10.0" prefWidth="162.0" />
-    <ColumnConstraints hgrow="SOMETIMES" maxWidth="310.0" minWidth="10.0" prefWidth="262.0" />
-    <ColumnConstraints hgrow="SOMETIMES" maxWidth="178.0" minWidth="10.0" prefWidth="126.0" />
+      <ColumnConstraints hgrow="SOMETIMES" maxWidth="191.0" minWidth="10.0" percentWidth="23.0" prefWidth="163.0" />
+    <ColumnConstraints hgrow="SOMETIMES" maxWidth="393.0" minWidth="10.0" percentWidth="60.0" prefWidth="315.0" />
+    <ColumnConstraints hgrow="SOMETIMES" maxWidth="314.0" minWidth="10.0" percentWidth="17.0" prefWidth="248.0" />
   </columnConstraints>
   <rowConstraints>
-    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+    <RowConstraints maxHeight="184.0" minHeight="3.0" percentHeight="25.0" prefHeight="81.0" vgrow="SOMETIMES" />
+    <RowConstraints maxHeight="186.0" minHeight="5.0" percentHeight="15.0" vgrow="SOMETIMES" />
+    <RowConstraints maxHeight="145.0" minHeight="10.0" percentHeight="15.0" prefHeight="53.0" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="127.0" minHeight="10.0" percentHeight="15.0" prefHeight="49.0" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="117.0" minHeight="10.0" percentHeight="15.0" prefHeight="44.0" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="102.0" minHeight="10.0" percentHeight="15.0" prefHeight="102.0" vgrow="SOMETIMES" />
   </rowConstraints>
    <children>
-      <TextField fx:id="fileSelectionTextField" GridPane.columnIndex="1" />
-      <Button fx:id="selectFileButton" mnemonicParsing="false" text="Select File(s)" GridPane.columnIndex="2">
-         <GridPane.margin>
-            <Insets left="15.0" />
-         </GridPane.margin>
-      </Button>
       <Label text="File(s) to rename:">
          <GridPane.margin>
             <Insets left="15.0" />
@@ -42,17 +36,24 @@
       </Label>
       <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="1">
          <children>
-            <CheckBox fx:id="directoriesCheckbox" mnemonicParsing="false" text="Directories" />
             <CheckBox fx:id="filesCheckbox" mnemonicParsing="false" text="Files">
                <HBox.margin>
-                  <Insets left="15.0" />
+                  <Insets />
                </HBox.margin>
             </CheckBox>
+            <CheckBox fx:id="directoriesCheckbox" mnemonicParsing="false" text="Directories">
+               <HBox.margin>
+                  <Insets left="15.0" />
+               </HBox.margin></CheckBox>
          </children>
       </HBox>
       <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="2">
          <children>
-            <CheckBox fx:id="includeSubdirectoriesCheckbox" mnemonicParsing="false" text="Include Sub-directories (recursively)" />
+            <CheckBox fx:id="includeSubdirectoriesCheckbox" mnemonicParsing="false" text="Include Sub-directories (recursively)">
+               <HBox.margin>
+                  <Insets right="15.0" />
+               </HBox.margin></CheckBox>
+            <CheckBox fx:id="includeRootDirectoryCheckbox" mnemonicParsing="false" text="Include root directory" />
          </children>
       </HBox>
       <Label text="Additional Options:" GridPane.rowIndex="2">
@@ -71,11 +72,43 @@
             <Insets left="15.0" />
          </GridPane.margin>
       </Label>
-      <TextField fx:id="textToAddTextField" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-      <Button fx:id="renameFilesButton" mnemonicParsing="false" text="Rename File(s)" GridPane.columnIndex="2" GridPane.rowIndex="5">
+      <TextField fx:id="textToAddTextField" GridPane.columnIndex="1" GridPane.rowIndex="4">
          <GridPane.margin>
-            <Insets left="15.0" />
+            <Insets right="15.0" />
          </GridPane.margin>
-      </Button>
+      </TextField>
+      <TextArea fx:id="fileSelectionTextArea" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1">
+         <GridPane.margin>
+            <Insets bottom="15.0" right="15.0" top="15.0" />
+         </GridPane.margin>
+      </TextArea>
+      <VBox alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="2">
+         <children>
+            <Button fx:id="selectFileButton" mnemonicParsing="false" prefWidth="100.0" text="Select File(s)">
+               <VBox.margin>
+                  <Insets bottom="15.0" right="15.0" />
+               </VBox.margin>
+            </Button>
+            <Button fx:id="selectDirectoryButton" mnemonicParsing="false" prefWidth="100.0" text="Select Directory">
+               <VBox.margin>
+                  <Insets right="15.0" />
+               </VBox.margin>
+            </Button>
+         </children>
+      </VBox>
+      <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="5">
+         <children>
+            <Button fx:id="renameFilesButton" mnemonicParsing="false" prefWidth="100.0" text="Rename File(s)">
+               <HBox.margin>
+                  <Insets right="15.0" />
+               </HBox.margin>
+            </Button>
+            <Button fx:id="exitButton" mnemonicParsing="false" prefWidth="100.0" text="Exit">
+               <HBox.margin>
+                  <Insets right="15.0" />
+               </HBox.margin>
+            </Button>
+         </children>
+      </HBox>
    </children>
 </fx:root>
