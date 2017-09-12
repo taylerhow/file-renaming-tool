@@ -1,2 +1,2 @@
 # file-renaming-utility
-A simple utility to automatically rename multiple files at once.
+A simple utility for renaming multiple files at once.
