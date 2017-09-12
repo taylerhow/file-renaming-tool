@@ -16,7 +16,7 @@ public class Startup extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception{
         primaryStage.setOnCloseRequest(e -> shutdown());
-        primaryStage.setTitle("Hello World");
+        primaryStage.setTitle("File Renaming Utility");
         MainPageController mainPageController = new MainPageController();
         primaryStage.setScene(new Scene(mainPageController));
         primaryStage.show();
