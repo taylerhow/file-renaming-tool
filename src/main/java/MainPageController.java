@@ -34,7 +34,11 @@ public class MainPageController extends GridPane implements Initializable {
     @FXML
     private CheckBox filesCheckbox;
     @FXML
-    private CheckBox includeSubdirectoriesCheckbox;
+    private CheckBox hiddenCheckbox;
+    @FXML
+    private CheckBox includeSubCheckbox;
+    @FXML
+    private CheckBox displaySubCheckbox;
     @FXML
     private ChoiceBox<RenamingOperation> operationChoiceBox;
     @FXML
@@ -53,7 +57,9 @@ public class MainPageController extends GridPane implements Initializable {
     private Set<File> allFiles;
     private boolean renameFilesSetting;
     private boolean renameDirectoriesSetting;
-    private boolean includeSubdirectoriesSetting;
+    private boolean renameHiddenSetting;
+    private boolean includeSubSetting;
+    private boolean displaySubSetting;
     private RenamingOperation operation;
     private String textToAdd;
 
@@ -63,7 +69,9 @@ public class MainPageController extends GridPane implements Initializable {
         this.allFiles = new TreeSet<>(new FileDepthComparator());
         this.renameFilesSetting = false;
         this.renameDirectoriesSetting = false;
-        this.includeSubdirectoriesSetting = false;
+        this.renameHiddenSetting = false;
+        this.includeSubSetting = false;
+        this.displaySubSetting = false;
         this.operation = RenamingOperation.Prepend;
         this.textToAdd = "";
 
@@ -92,6 +100,7 @@ public class MainPageController extends GridPane implements Initializable {
     @Override
     public void initialize(URL fxmlFileLocation, ResourceBundle resources) {
         this.fileSelectionTextArea.setEditable(false);
+        this.displaySubCheckbox.setDisable(true);
         this.operationChoiceBox.setItems(FXCollections.observableArrayList(RenamingOperation.values()));
         this.operationChoiceBox.setValue(RenamingOperation.Prepend);
 
@@ -100,7 +109,9 @@ public class MainPageController extends GridPane implements Initializable {
         this.clearFileSelectionButton.setOnAction((event -> clearSelectedFiles()));
         this.filesCheckbox.setOnAction((event -> updateRenameFilesSetting()));
         this.directoriesCheckbox.setOnAction((event -> updateRenameDirectoriesSetting()));
-        this.includeSubdirectoriesCheckbox.setOnAction((event -> updateIncludeSubdirectoriesSetting()));
+        this.hiddenCheckbox.setOnAction((event -> updateRenameHiddenSetting()));
+        this.includeSubCheckbox.setOnAction((event -> updateIncludeSubSetting()));
+        this.displaySubCheckbox.setOnAction((event -> updateDisplaySubSetting()));
         this.operationChoiceBox.setOnAction((event -> updateOperation()));
         this.textToAddTextField.textProperty().addListener(((observable, oldValue, newValue) -> {
             this.textToAdd = newValue;
@@ -141,21 +152,30 @@ public class MainPageController extends GridPane implements Initializable {
 
     private void updateSelectedFilesTextField() {
         Set<File> files = getActiveFileSet();
+        if (!displaySubSetting) {
+            files = this.primaryFiles;
+        }
 
+        String hiddenString = "Hidden:\n";
         String filesString = "Files:\n";
         String directoriesString = "Directories:\n";
 
         for (File currentFile : files) {
-            if (currentFile.isFile()) {
+            if (currentFile.isHidden()) {
+                hiddenString += currentFile.getName();
+                hiddenString += "\n";
+            } else if (currentFile.isFile()) {
                 filesString += currentFile.getName();
                 filesString += "\n";
-            } else {
+            } else if (currentFile.isDirectory()){
                 directoriesString += currentFile.getName();
                 directoriesString += "\n";
+            } else {
+                System.err.println("WARNING: Unknown file type: " + currentFile.getName());
             }
         }
 
-        this.fileSelectionTextArea.setText(filesString + "\n" + directoriesString);
+        this.fileSelectionTextArea.setText(hiddenString + "\n" + filesString + "\n" + directoriesString);
     }
 
     private void updateRenameFilesSetting() {
@@ -166,9 +186,23 @@ public class MainPageController extends GridPane implements Initializable {
         this.renameDirectoriesSetting = this.directoriesCheckbox.isSelected();
     }
 
-    private void updateIncludeSubdirectoriesSetting() {
-        this.includeSubdirectoriesSetting = this.includeSubdirectoriesCheckbox.isSelected();
+    private void updateRenameHiddenSetting() {
+        this.renameHiddenSetting = this.hiddenCheckbox.isSelected();
+    }
+
+    private void updateIncludeSubSetting() {
+        this.includeSubSetting = this.includeSubCheckbox.isSelected();
+        if (includeSubSetting) {
+            this.displaySubCheckbox.setDisable(false);
+        } else {
+            this.displaySubCheckbox.setDisable(true);
+        }
         computeAllFilesRecursively();
+        updateSelectedFilesTextField();
+    }
+
+    private void updateDisplaySubSetting() {
+        this.displaySubSetting = this.displaySubCheckbox.isSelected();
         updateSelectedFilesTextField();
     }
 
@@ -181,7 +215,7 @@ public class MainPageController extends GridPane implements Initializable {
         System.out.println(this.primaryFiles.toString());
         System.out.println(this.renameFilesSetting);
         System.out.println(this.renameDirectoriesSetting);
-        System.out.println(this.includeSubdirectoriesSetting);
+        System.out.println(this.includeSubSetting);
         System.out.println(this.operation);
         System.out.println(this.textToAdd);
 
@@ -191,7 +225,7 @@ public class MainPageController extends GridPane implements Initializable {
 
     private void computeAllFilesRecursively() {
         this.allFiles.clear();
-        if (this.includeSubdirectoriesSetting) {
+        if (this.includeSubSetting) {
             for (File currentFile : this.primaryFiles) {
                 if (currentFile.isDirectory()) {
                     try (Stream<Path> paths = Files.walk(Paths.get(currentFile.toURI()))) {
@@ -217,7 +251,7 @@ public class MainPageController extends GridPane implements Initializable {
     }
 
     private Set<File> getActiveFileSet() {
-        if (this.includeSubdirectoriesSetting) {
+        if (this.includeSubSetting) {
             return this.allFiles;
         } else {
             return this.primaryFiles;
