@@ -1,3 +1,4 @@
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -33,7 +34,7 @@ public class MainPageController extends GridPane implements Initializable {
     @FXML
     private CheckBox includeSubdirectoriesCheckbox;
     @FXML
-    private ChoiceBox<String> renamingOperationChoicebox;
+    private ChoiceBox<RenamingOperation> operationChoiceBox;
     @FXML
     private TextField textToAddTextField;
     @FXML
@@ -41,11 +42,17 @@ public class MainPageController extends GridPane implements Initializable {
     @FXML
     private Button exitButton;
 
+    private enum RenamingOperation {
+        Prepend,
+        Append;
+    }
+
     private List<File> files;
     private List<File> directories;
     private boolean renameFilesSetting;
     private boolean renameDirectoriesSetting;
     private boolean includeSubdirectoriesSetting;
+    private RenamingOperation operation;
     private String textToAdd;
 
 
@@ -54,6 +61,8 @@ public class MainPageController extends GridPane implements Initializable {
         this.directories = new ArrayList<>();
         this.renameFilesSetting = false;
         this.renameDirectoriesSetting = false;
+        this.includeSubdirectoriesSetting = false;
+        this.operation = RenamingOperation.Prepend;
         this.textToAdd = "";
 
         try {
@@ -81,6 +90,8 @@ public class MainPageController extends GridPane implements Initializable {
     @Override
     public void initialize(URL fxmlFileLocation, ResourceBundle resources) {
         this.fileSelectionTextArea.setEditable(false);
+        this.operationChoiceBox.setItems(FXCollections.observableArrayList(RenamingOperation.values()));
+        this.operationChoiceBox.setValue(RenamingOperation.Prepend);
 
         this.addFilesButton.setOnAction((event -> addFiles()));
         this.addDirectoryButton.setOnAction((event -> addDirectory()));
@@ -88,6 +99,8 @@ public class MainPageController extends GridPane implements Initializable {
         this.filesCheckbox.setOnAction((event -> updateRenameFilesSetting()));
         this.directoriesCheckbox.setOnAction((event -> updateRenameDirectoriesSetting()));
         this.includeSubdirectoriesCheckbox.setOnAction((event -> updateIncludeSubdirectoriesSetting()));
+        this.operationChoiceBox.setOnAction((event -> updateOperation()));
+        this.textToAddTextField.setOnAction((event -> updateTextToAdd()));
 
         updateSelectedFilesTextField();
     }
@@ -147,5 +160,13 @@ public class MainPageController extends GridPane implements Initializable {
 
     private void updateIncludeSubdirectoriesSetting() {
         this.includeSubdirectoriesSetting = this.includeSubdirectoriesCheckbox.isSelected();
+    }
+
+    private void updateOperation() {
+        this.operation = this.operationChoiceBox.getValue();
+    }
+
+    private void updateTextToAdd() {
+        this.textToAdd = this.textToAddTextField.getText();
     }
 }
