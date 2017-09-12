@@ -67,11 +67,11 @@ public class MainPageController extends GridPane implements Initializable {
     public MainPageController() {
         this.primaryFiles = new TreeSet<>(new FileDepthComparator());
         this.allFiles = new TreeSet<>(new FileDepthComparator());
-        this.renameFilesSetting = false;
-        this.renameDirectoriesSetting = false;
+        this.renameFilesSetting = true;
+        this.renameDirectoriesSetting = true;
         this.renameHiddenSetting = false;
         this.includeSubSetting = false;
-        this.displaySubSetting = false;
+        this.displaySubSetting = true;
         this.operation = RenamingOperation.Prepend;
         this.textToAdd = "";
 
@@ -100,7 +100,10 @@ public class MainPageController extends GridPane implements Initializable {
     @Override
     public void initialize(URL fxmlFileLocation, ResourceBundle resources) {
         this.fileSelectionTextArea.setEditable(false);
+        this.filesCheckbox.setSelected(true);
+        this.directoriesCheckbox.setSelected(true);
         this.displaySubCheckbox.setDisable(true);
+        this.displaySubCheckbox.setSelected(true);
         this.operationChoiceBox.setItems(FXCollections.observableArrayList(RenamingOperation.values()));
         this.operationChoiceBox.setValue(RenamingOperation.Prepend);
 
@@ -167,7 +170,7 @@ public class MainPageController extends GridPane implements Initializable {
             } else if (currentFile.isFile()) {
                 filesString += currentFile.getName();
                 filesString += "\n";
-            } else if (currentFile.isDirectory()){
+            } else if (currentFile.isDirectory()) {
                 directoriesString += currentFile.getName();
                 directoriesString += "\n";
             } else {
@@ -175,7 +178,18 @@ public class MainPageController extends GridPane implements Initializable {
             }
         }
 
-        this.fileSelectionTextArea.setText(hiddenString + "\n" + filesString + "\n" + directoriesString);
+        String updatedText = "";
+        if (this.renameHiddenSetting) {
+            updatedText += hiddenString + "\n";
+        }
+        if (this.renameFilesSetting) {
+            updatedText += filesString + "\n";
+        }
+        if (this.renameDirectoriesSetting) {
+            updatedText += directoriesString;
+        }
+
+        this.fileSelectionTextArea.setText(updatedText);
     }
 
     private void updateRenameFilesSetting() {
@@ -211,16 +225,54 @@ public class MainPageController extends GridPane implements Initializable {
     }
 
     private void renameFiles() {
-        // TODO: Implement
-        System.out.println(this.primaryFiles.toString());
-        System.out.println(this.renameFilesSetting);
-        System.out.println(this.renameDirectoriesSetting);
-        System.out.println(this.includeSubSetting);
-        System.out.println(this.operation);
-        System.out.println(this.textToAdd);
+//        System.out.println(this.primaryFiles.toString());
+//        System.out.println(this.renameFilesSetting);
+//        System.out.println(this.renameDirectoriesSetting);
+//        System.out.println(this.includeSubSetting);
+//        System.out.println(this.operation);
+//        System.out.println(this.textToAdd);
+//
+//        System.out.println("");
+//        printFileList();
 
-        System.out.println("");
-        printFileList();
+        Set<File> files = getActiveFileSet();
+        for (File currentFile : files) {
+            if ((currentFile.isHidden() && !this.renameHiddenSetting)
+                    || (currentFile.isDirectory() && !this.renameDirectoriesSetting)
+                    || (currentFile.isFile() && !this.renameFilesSetting)) {
+                continue;
+            }
+
+            Path oldPath = currentFile.toPath();
+            String newPathString = calculateNewPathString(currentFile.getPath());
+            try {
+                Files.move(currentFile.toPath(), Paths.get(newPathString));
+            } catch (IOException e) {
+                System.err.println("ERROR: Could not rename " + currentFile.getPath());
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private String calculateNewPathString(String oldPathString) {
+        if (this.operation == RenamingOperation.Prepend) {
+            int breakpoint = oldPathString.lastIndexOf("\\");
+            String firstHalf = oldPathString.substring(0, breakpoint + 1);
+            String lastHalf = oldPathString.substring(breakpoint + 1);
+            return firstHalf + this.textToAdd + lastHalf;
+        } else if (this.operation == RenamingOperation.Append) {
+            int breakpoint = oldPathString.lastIndexOf(".");
+            if (breakpoint != -1) {
+                String firstHalf = oldPathString.substring(0, breakpoint);
+                String lastHalf = oldPathString.substring(breakpoint);
+                return firstHalf + this.textToAdd + lastHalf;
+            } else {
+                return oldPathString + this.textToAdd;
+            }
+        } else {
+            System.err.println("ERROR: Invalid renaming operation");
+            return "error";
+        }
     }
 
     private void computeAllFilesRecursively() {
