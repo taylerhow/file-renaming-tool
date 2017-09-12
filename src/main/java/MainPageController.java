@@ -3,11 +3,13 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -18,7 +20,11 @@ public class MainPageController extends GridPane implements Initializable {
     @FXML
     private TextArea fileSelectionTextArea;
     @FXML
-    private Button selectFileButton;
+    private Button addFilesButton;
+    @FXML
+    private Button addDirectoryButton;
+    @FXML
+    private Button clearFileSelectionButton;
     @FXML
     private CheckBox directoriesCheckbox;
     @FXML
@@ -26,15 +32,21 @@ public class MainPageController extends GridPane implements Initializable {
     @FXML
     private CheckBox includeSubdirectoriesCheckbox;
     @FXML
-    private CheckBox includeRootDirectoryCheckbox;
-    @FXML
     private ChoiceBox<String> renamingOperationChoicebox;
     @FXML
     private TextField textToAddTextField;
     @FXML
     private Button renameFilesButton;
+    @FXML
+    private Button exitButton;
+
+    private List<File> files;
+    private List<File> directories;
 
     public MainPageController() {
+        this.files = new ArrayList<>();
+        this.directories = new ArrayList<>();
+
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(pageLoc));
             loader.setController(this);
@@ -60,25 +72,55 @@ public class MainPageController extends GridPane implements Initializable {
     @Override
     public void initialize(URL fxmlFileLocation, ResourceBundle resources) {
         this.fileSelectionTextArea.setEditable(false);
-        this.selectFileButton.setOnAction((event -> selectFiles()));
+        this.addFilesButton.setOnAction((event -> addFiles()));
+        this.addDirectoryButton.setOnAction((event -> addDirectory()));
+        this.clearFileSelectionButton.setOnAction((event -> clearSelectedFiles()));
+
+        updateSelectedFilesTextField();
     }
 
-    private void selectFiles() {
+    private void addFiles() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
-        List<File> selectedFiles = fileChooser.showOpenMultipleDialog(selectFileButton.getScene().getWindow());
-        updateSelectedFilesTextField(selectedFiles);
+        List<File> selectedFiles = fileChooser.showOpenMultipleDialog(addFilesButton.getScene().getWindow());
+        if (selectedFiles != null) {
+            this.files.addAll(selectedFiles);
+            updateSelectedFilesTextField();
+        }
     }
 
-    private void updateSelectedFilesTextField(List<File> files) {
-        String updatedString = "";
-        for (int i = 0; i < files.size(); i++) {
-            File currentFile = files.get(i);
-            updatedString += currentFile.getName();
-            if (i != 0) {
-                updatedString += ", ";
-            }
+    private void addDirectory() {
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        directoryChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+        File selectedDirectory = directoryChooser.showDialog(addDirectoryButton.getScene().getWindow());
+        if (selectedDirectory != null) {
+            this.directories.add(selectedDirectory);
+            updateSelectedFilesTextField();
         }
+    }
+
+    private void clearSelectedFiles() {
+        this.files.clear();
+        this.directories.clear();
+        updateSelectedFilesTextField();
+    }
+
+    private void updateSelectedFilesTextField() {
+        String updatedString = "Files:\n";
+
+        for (int i = 0; i < this.files.size(); i++) {
+            File currentFile = this.files.get(i);
+            updatedString += currentFile.getName();
+            updatedString += "\n";
+        }
+
+        updatedString += "\nDirectories:\n";
+        for (int i = 0; i < this.directories.size(); i++) {
+            File currentFile = this.directories.get(i);
+            updatedString += currentFile.getName();
+            updatedString += "\n";
+        }
+
         this.fileSelectionTextArea.setText(updatedString);
     }
 }
